@@ -1,16 +1,21 @@
 import javax.swing.*;
+import javax.swing.filechooser.FileNameExtensionFilter;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
 
 public class Maze extends JFrame {
+    private JPanel buttonPanel;
+    private JPanel fileNamePanel;
     private JPanel mazePanel;
-    private JButton loadTextButton;
-    private JButton loadBinaryButton;
+    private JButton uploadButton;
     private JButton findPathButton;
-    private JButton choosePathButton;
-    private JTextField txtFileNameField;
-    private JTextField binFileNameField;
+    private JFileChooser fileChooser;
+    private char[][] maze;
 
     public Maze() {
         setTitle("A-MAZE-ING Solver");
@@ -22,144 +27,110 @@ public class Maze extends JFrame {
         headerLabel.setFont(new Font("Arial", Font.BOLD, 24));
         add(headerLabel, BorderLayout.NORTH);
 
-        JPanel buttonPanel = new JPanel();
+        buttonPanel = new JPanel();
         buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
         buttonPanel.setPreferredSize(new Dimension(250, getHeight()));
         buttonPanel.setBackground(Color.LIGHT_GRAY);
         buttonPanel.add(Box.createRigidArea(new Dimension(0, 60)));
 
-        txtFileNameField = new JTextField("name of txt file");
-        txtFileNameField.setMaximumSize(new Dimension(180, 30));
-        txtFileNameField.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2, true));
-        buttonPanel.add(txtFileNameField);
+        fileNamePanel = new JPanel();
+        fileNamePanel.setAlignmentX(Component.CENTER_ALIGNMENT);
+        fileNamePanel.setMaximumSize(new Dimension(Short.MAX_VALUE, 30));
+        JLabel fileNameLabel = new JLabel("Read maze from txt or bin file");
+        fileNameLabel.setForeground(Color.WHITE);
+        fileNameLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        fileNamePanel.add(fileNameLabel);
+        buttonPanel.add(fileNamePanel);
         buttonPanel.add(Box.createRigidArea(new Dimension(0, 10)));
+        
+        uploadButton = new JButton("Upload file");
+        uploadButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        uploadButton.setPreferredSize(new Dimension(180, 40));
+        uploadButton.setFont(new Font("Arial", Font.BOLD, 14));
+        uploadButton.setForeground(Color.WHITE);
+        uploadButton.setBackground(Color.BLUE);
+        buttonPanel.add(uploadButton);
+        buttonPanel.add(Box.createRigidArea(new Dimension(0, 30)));
 
-        loadTextButton = new JButton("Load txt");
-        loadTextButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        loadTextButton.setPreferredSize(new Dimension(80, 40));
-        loadTextButton.setBorder(BorderFactory.createLineBorder(Color.BLUE, 10, true));
-        loadTextButton.setBackground(Color.BLUE);
-        loadTextButton.setForeground(Color.WHITE);
-        loadTextButton.setFont(new Font("Arial", Font.BOLD, 14));
-        buttonPanel.add(loadTextButton);
-        buttonPanel.add(Box.createRigidArea(new Dimension(0, 60)));
-
-        binFileNameField = new JTextField("name of bin file");
-        binFileNameField.setMaximumSize(new Dimension(180, 30));
-        binFileNameField.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2, true));
-        buttonPanel.add(binFileNameField);
-        buttonPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-
-        loadBinaryButton = new JButton("Load Binary");
-        loadBinaryButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        loadBinaryButton.setPreferredSize(new Dimension(80, 40));
-        loadBinaryButton.setBorder(BorderFactory.createLineBorder(Color.GREEN, 10, true));
-        loadBinaryButton.setBackground(Color.GREEN);
-        loadBinaryButton.setForeground(Color.WHITE);
-        loadBinaryButton.setFont(new Font("Arial", Font.BOLD, 14));
-        buttonPanel.add(loadBinaryButton);
-        buttonPanel.add(Box.createRigidArea(new Dimension(0, 100)));
+        uploadButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                fileChooser = new JFileChooser();
+                fileChooser.setFileFilter(new FileNameExtensionFilter("Text and Binary Files", "txt", "bin"));
+                int result = fileChooser.showOpenDialog(Maze.this);
+                if (result == JFileChooser.APPROVE_OPTION) {
+                    File selectedFile = fileChooser.getSelectedFile();
+                    readMazeFromFile(selectedFile);
+                    mazePanel.repaint();
+                }
+            }
+        });
 
         findPathButton = new JButton("Find shortest path");
         findPathButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        findPathButton.setPreferredSize(new Dimension(80, 40));
-        findPathButton.setBorder(BorderFactory.createLineBorder(Color.RED, 10, true));
-        findPathButton.setBackground(Color.RED);
+        findPathButton.setPreferredSize(new Dimension(150, 40));
         findPathButton.setFont(new Font("Arial", Font.BOLD, 14));
         findPathButton.setForeground(Color.WHITE);
+        findPathButton.setBackground(Color.RED);
         buttonPanel.add(findPathButton);
-        buttonPanel.add(Box.createRigidArea(new Dimension(0,30))); 
-        
-        choosePathButton = new JButton("Change start-end points");
-        choosePathButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        choosePathButton.setPreferredSize(new Dimension(80, 40));
-        choosePathButton.setBorder(BorderFactory.createLineBorder(Color.RED, 10, true));
-        choosePathButton.setBackground(Color.RED);
-        choosePathButton.setFont(new Font("Arial", Font.BOLD, 14));
-        choosePathButton.setForeground(Color.WHITE);
-        buttonPanel.add(choosePathButton);
-        buttonPanel.add(Box.createRigidArea(new Dimension(0,30))); 
+        buttonPanel.add(Box.createRigidArea(new Dimension(0, 30)));
 
-        
         add(buttonPanel, BorderLayout.WEST);
 
-        mazePanel = new JPanel();
-        mazePanel.setBackground(Color.GRAY); 
-        mazePanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        mazePanel = new JPanel() {
+            @Override
+            protected void paintComponent(Graphics g) {
+                super.paintComponent(g);
+                if (maze != null) {
+                    int blockSize = 30;
+                    for (int i = 0; i < maze.length; i++) {
+                        for (int j = 0; j < maze[i].length; j++) {
+                            Color color;
+                            switch (maze[i][j]) {
+                                case 'X':
+                                    color = Color.BLACK;
+                                    break;
+                                case 'P':
+                                    color = Color.GREEN;
+                                    break;
+                                case 'K':
+                                    color = Color.RED;
+                                    break;
+                                default:
+                                    color = Color.WHITE;
+                                    break;
+                            }
+                            g.setColor(color);
+                            g.fillRect(j * blockSize, i * blockSize, blockSize, blockSize);
+                        }
+                    }
+                }
+            }
+        };
+        mazePanel.setBackground(Color.GRAY);
         add(mazePanel, BorderLayout.CENTER);
-
-        loadTextButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(Maze.this, "Wczytano plik tekstowy: \"" + txtFileNameField.getText() + ".txt\"");
-                drawMaze();
-            }
-        });
-
-        loadBinaryButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                JOptionPane.showMessageDialog(Maze.this, "Wczytano plik binarny: \"" + binFileNameField.getText() + ".bin\"");
-                drawMaze();
-            }
-        });
 
         setLocationRelativeTo(null);
         setVisible(true);
     }
-    
-    private void drawMaze() {
-        int blockSize = 50;
-        int[][] maze = {
-        	    {1, 10, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-        	    {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1},
-        	    {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1},
-        	    {1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1},
-        	    {1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1},
-        	    {1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1},
-        	    {1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 0, 0, 1},
-        	    {1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1},
-        	    {1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1, 0, 1},
-        	    {1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 1, 0, 1},
-        	    {1, 0, 1, 0, 0, 0, 1, 0, 1, 0, 1, 0, 1},
-        	    {1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0, 0, 1},
-        	    {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 11, 1},
-        	};
 
-
-        mazePanel.removeAll();
-        
-        for (int i = 0; i < maze.length; i++) {
-            for (int j = 0; j < maze[i].length; j++) {
-                JPanel block = new JPanel();
-                if(maze[i][j] == 0) {
-                	block.setBackground(Color.WHITE);
-                }
-                else if(maze[i][j] == 1) {
-                	block.setBackground(Color.BLACK);
-                }
-                else if(maze[i][j] == 10) {
-                	block.setBackground(Color.RED);
-                	JLabel labelStart = new JLabel("Start");
-                	 labelStart.setFont(labelStart.getFont().deriveFont(Font.BOLD, 10));
-                	 labelStart.setForeground(Color.WHITE);
-                    block.add(labelStart);
-                }
-                else if(maze[i][j] == 11) {
-                	block.setBackground(Color.RED);
-                	JLabel labelEnd = new JLabel("Koniec");
-                	labelEnd.setFont(labelEnd.getFont().deriveFont(Font.BOLD, 10));
-                	labelEnd.setForeground(Color.WHITE);
-                    block.add(labelEnd);	
-                }
-                block.setPreferredSize(new Dimension(blockSize, blockSize));
-                mazePanel.add(block);
+    private void readMazeFromFile(File file) {
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            StringBuilder sb = new StringBuilder();
+            String line;
+            while ((line = reader.readLine()) != null) {
+                sb.append(line).append("\n");
             }
+            int rows = sb.toString().split("\n").length;
+            maze = new char[rows][];
+            int i = 0;
+            for (String l : sb.toString().split("\n")) {
+                maze[i++] = l.toCharArray();
+            }
+            mazePanel.setPreferredSize(new Dimension(maze[0].length * 30, rows * 30));
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-
-        mazePanel.setLayout(new GridLayout(maze.length, maze[0].length));
-        mazePanel.revalidate();
-        mazePanel.repaint();
     }
 
     public static void main(String[] args) {
