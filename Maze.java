@@ -35,14 +35,14 @@ public class Maze extends JFrame {
 
         fileNamePanel = new JPanel();
         fileNamePanel.setAlignmentX(Component.CENTER_ALIGNMENT);
-        fileNamePanel.setMaximumSize(new Dimension(Short.MAX_VALUE, 30));
+        fileNamePanel.setMaximumSize(new Dimension(235, 30));
         JLabel fileNameLabel = new JLabel("Read maze from txt or bin file");
         fileNameLabel.setForeground(Color.WHITE);
-        fileNameLabel.setFont(new Font("Arial", Font.BOLD, 16));
+        fileNameLabel.setFont(new Font("Arial", Font.BOLD, 13));
         fileNamePanel.add(fileNameLabel);
         buttonPanel.add(fileNamePanel);
         buttonPanel.add(Box.createRigidArea(new Dimension(0, 10)));
-        
+
         uploadButton = new JButton("Upload file");
         uploadButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         uploadButton.setPreferredSize(new Dimension(180, 40));
@@ -60,6 +60,8 @@ public class Maze extends JFrame {
                 int result = fileChooser.showOpenDialog(Maze.this);
                 if (result == JFileChooser.APPROVE_OPTION) {
                     File selectedFile = fileChooser.getSelectedFile();
+                    String fileName = selectedFile.getName();
+                    fileNameLabel.setText(fileName);
                     readMazeFromFile(selectedFile);
                     mazePanel.repaint();
                 }
@@ -108,7 +110,11 @@ public class Maze extends JFrame {
             }
         };
         mazePanel.setBackground(Color.GRAY);
-        add(mazePanel, BorderLayout.CENTER);
+
+        mazePanel.setPreferredSize(new Dimension(600, 400));
+
+        JScrollPane scrollPane = new JScrollPane(mazePanel);
+        add(scrollPane, BorderLayout.CENTER);
 
         setLocationRelativeTo(null);
         setVisible(true);
