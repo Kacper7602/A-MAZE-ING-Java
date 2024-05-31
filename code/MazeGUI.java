@@ -11,6 +11,8 @@ public class MazeGUI extends JFrame {
     private MazeSubject mazePanel;
     private JButton loadButton;
     private JButton findPathButton;
+    private JButton setEntryPointButton;
+    private JButton setEndPointButton;
     private JFileChooser fileChooser;
     private int[][] maze;
     private int startRow, startCol, endRow, endCol;
@@ -123,7 +125,70 @@ public class MazeGUI extends JFrame {
                 findPathButton.setBackground(Color.RED);
             }
         });
+        setEntryPointButton = new JButton("Set new entry point");
+        setEntryPointButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        setEntryPointButton.setPreferredSize(new Dimension(150, 40));
+        setEntryPointButton.setFont(new Font("Arial", Font.BOLD, 14));
+        setEntryPointButton.setForeground(Color.WHITE);
+        setEntryPointButton.setBackground(Color.RED);
+        setEntryPointButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        buttonPanel.add(setEntryPointButton);
+        buttonPanel.add(Box.createRigidArea(new Dimension(0, 30)));
+        add(buttonPanel, BorderLayout.WEST);
+        setEntryPointButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (maze != null) {
+                    findShortestPath();
+                } else {
+                    JOptionPane.showMessageDialog(MazeGUI.this, "Please load a maze first.", "No Maze Loaded", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        });
+        setEntryPointButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                infoLabel.setText("Choose your own starting point!");
+                setEntryPointButton.setBackground(Color.GREEN);
+            }
 
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                infoLabel.setText("...");
+                setEntryPointButton.setBackground(Color.RED);
+            }
+        });
+
+
+        setEndPointButton = new JButton("Set new end point");
+        setEndPointButton.setAlignmentX(Component.CENTER_ALIGNMENT);
+        setEndPointButton.setPreferredSize(new Dimension(150, 40));
+        setEndPointButton.setFont(new Font("Arial", Font.BOLD, 14));
+        setEndPointButton.setForeground(Color.WHITE);
+        setEndPointButton.setBackground(Color.RED);
+        setEndPointButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        buttonPanel.add(setEndPointButton);
+        buttonPanel.add(Box.createRigidArea(new Dimension(0, 30)));
+        add(buttonPanel, BorderLayout.WEST);
+        setEndPointButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                if (maze != null) {
+                    findShortestPath();
+                } else {
+                    JOptionPane.showMessageDialog(MazeGUI.this, "Please load a maze first.", "No Maze Loaded", JOptionPane.WARNING_MESSAGE);
+                }
+            }
+        });
+        setEndPointButton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                infoLabel.setText("Choose your own end point!");
+                setEndPointButton.setBackground(Color.GREEN);
+            }
+
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                infoLabel.setText("...");
+                setEndPointButton.setBackground(Color.RED);
+            }
+        });
         mazePanel = new MazeSubject();
         mazePanel.setBackground(Color.GRAY);
         mazePanel.setPreferredSize(new Dimension(600, 400));
