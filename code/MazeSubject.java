@@ -38,24 +38,13 @@ public class MazeSubject extends JPanel {
             int blockSize = 10;
             for (int i = 0; i < maze.length; i++) {
                 for (int j = 0; j < maze[i].length; j++) {
-                    Color color;
-                    switch (maze[i][j]) {
-                        case 1:
-                            color = Color.BLACK;
-                            break;
-                        case 10:
-                            color = Color.GREEN;
-                            break;
-                        case 11:
-                            color = Color.RED;
-                            break;
-                        case 2:
-                            color = Color.BLUE; // Koloruj ścieżkę na niebiesko
-                            break;
-                        default:
-                            color = Color.WHITE;
-                            break;
-                    }
+                    Color color = switch (maze[i][j]) {
+                        case 1 -> Color.BLACK;
+                        case 10 -> Color.GREEN;
+                        case 11 -> Color.RED;
+                        case 2 -> Color.BLUE; // Koloruj ścieżkę na niebiesko
+                        default -> Color.WHITE;
+                    };
                     g.setColor(color);
                     g.fillRect(j * blockSize, i * blockSize, blockSize, blockSize);
                 }

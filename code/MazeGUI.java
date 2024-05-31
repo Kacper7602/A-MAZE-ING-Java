@@ -48,7 +48,7 @@ public class MazeGUI extends JFrame {
         fileNamePanel = new JPanel();
         fileNamePanel.setAlignmentX(Component.CENTER_ALIGNMENT);
         fileNamePanel.setMaximumSize(new Dimension(235, 30));
-        JLabel fileNameLabel = new JLabel("Read maze from txt or bin file");
+        JLabel fileNameLabel = new JLabel("Read maze from txt file");
         fileNameLabel.setForeground(Color.WHITE);
         fileNameLabel.setFont(new Font("Arial", Font.BOLD, 13));
         fileNamePanel.add(fileNameLabel);
