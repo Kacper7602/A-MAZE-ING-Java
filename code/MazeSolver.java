@@ -47,7 +47,7 @@ public class MazeSolver {
     }
 
     private void reconstructPath(int startRow, int startCol, int endRow, int endCol) {
-        int current = endRow * maze[0].length + endCol;
+        int current = endRow * maze[0].length + endCol - 1;
         while (current != startRow * maze[0].length + startCol) {
             int row = current / maze[0].length;
             int col = current % maze[0].length;
