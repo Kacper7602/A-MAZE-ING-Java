@@ -82,7 +82,7 @@ public class MazeGUI extends JFrame {
 
         loadButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                infoLabel.setText("Load the maze from a text or binary file.");
+                infoLabel.setText("Load the maze from a txt file.");
                 loadButton.setBackground(Color.GREEN);
             }
 
@@ -116,7 +116,7 @@ public class MazeGUI extends JFrame {
 
         findPathButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                infoLabel.setText("Find the shortest path in the maze!");
+                infoLabel.setText("Find the shortest path in the maze using bfs algorithm!");
                 findPathButton.setBackground(Color.GREEN);
             }
 
@@ -125,7 +125,8 @@ public class MazeGUI extends JFrame {
                 findPathButton.setBackground(Color.RED);
             }
         });
-        setEntryPointButton = new JButton("Set new entry point");
+
+        setEntryPointButton = new JButton("Set new entry and end point");
         setEntryPointButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         setEntryPointButton.setPreferredSize(new Dimension(150, 40));
         setEntryPointButton.setFont(new Font("Arial", Font.BOLD, 14));
@@ -147,7 +148,7 @@ public class MazeGUI extends JFrame {
         });
         setEntryPointButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                infoLabel.setText("Choose your own starting point!");
+                infoLabel.setText("First click will determinate starting point and second - end point.");
                 setEntryPointButton.setBackground(Color.GREEN);
             }
 
@@ -157,7 +158,7 @@ public class MazeGUI extends JFrame {
             }
         });
 
-
+/*
         setEndPointButton = new JButton("Set new end point");
         setEndPointButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         setEndPointButton.setPreferredSize(new Dimension(150, 40));
@@ -189,6 +190,8 @@ public class MazeGUI extends JFrame {
                 setEndPointButton.setBackground(Color.RED);
             }
         });
+
+ */
         mazePanel = new MazeSubject();
         mazePanel.setBackground(Color.GRAY);
         mazePanel.setPreferredSize(new Dimension(600, 400));
