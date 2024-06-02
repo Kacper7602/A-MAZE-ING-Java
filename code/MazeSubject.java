@@ -42,7 +42,7 @@ public class MazeSubject extends JPanel {
                         case 1 -> Color.BLACK;
                         case 10 -> Color.GREEN;
                         case 11 -> Color.RED;
-                        case 2 -> Color.BLUE; // Koloruj ścieżkę na niebiesko
+                        case 2 -> Color.ORANGE; // Koloruj ścieżkę na niebiesko
                         default -> Color.WHITE;
                     };
                     g.setColor(color);

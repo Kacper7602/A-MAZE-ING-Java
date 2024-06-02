@@ -4,6 +4,8 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 
 public class MazeGUI extends JFrame {
     private JPanel buttonPanel;
@@ -12,10 +14,11 @@ public class MazeGUI extends JFrame {
     private JButton loadButton;
     private JButton findPathButton;
     private JButton setEntryPointButton;
-    private JButton setEndPointButton;
     private JFileChooser fileChooser;
     private int[][] maze;
     private int startRow, startCol, endRow, endCol;
+    private boolean settingEntry = false;
+    private boolean settingExit = false;
 
     public MazeGUI() {
         setTitle("A-MAZE-ING Solver");
@@ -136,16 +139,20 @@ public class MazeGUI extends JFrame {
         buttonPanel.add(setEntryPointButton);
         buttonPanel.add(Box.createRigidArea(new Dimension(0, 30)));
         add(buttonPanel, BorderLayout.WEST);
+
         setEntryPointButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (maze != null) {
-                    findShortestPath();
+                    JOptionPane.showMessageDialog(MazeGUI.this, "Now you can set new entry and end point by clicking on the maze.", "Action requested", JOptionPane.INFORMATION_MESSAGE);
+                    settingEntry=true;
+                    settingExit=true;
                 } else {
                     JOptionPane.showMessageDialog(MazeGUI.this, "Please load a maze first.", "No Maze Loaded", JOptionPane.WARNING_MESSAGE);
                 }
             }
         });
+
         setEntryPointButton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
                 infoLabel.setText("First click will determinate starting point and second - end point.");
@@ -158,46 +165,19 @@ public class MazeGUI extends JFrame {
             }
         });
 
-/*
-        setEndPointButton = new JButton("Set new end point");
-        setEndPointButton.setAlignmentX(Component.CENTER_ALIGNMENT);
-        setEndPointButton.setPreferredSize(new Dimension(150, 40));
-        setEndPointButton.setFont(new Font("Arial", Font.BOLD, 14));
-        setEndPointButton.setForeground(Color.WHITE);
-        setEndPointButton.setBackground(Color.RED);
-        setEndPointButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-        buttonPanel.add(setEndPointButton);
-        buttonPanel.add(Box.createRigidArea(new Dimension(0, 30)));
-        add(buttonPanel, BorderLayout.WEST);
-        setEndPointButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (maze != null) {
-                    findShortestPath();
-                } else {
-                    JOptionPane.showMessageDialog(MazeGUI.this, "Please load a maze first.", "No Maze Loaded", JOptionPane.WARNING_MESSAGE);
-                }
-            }
-        });
-        setEndPointButton.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseEntered(java.awt.event.MouseEvent evt) {
-                infoLabel.setText("Choose your own end point!");
-                setEndPointButton.setBackground(Color.GREEN);
-            }
-
-            public void mouseExited(java.awt.event.MouseEvent evt) {
-                infoLabel.setText("...");
-                setEndPointButton.setBackground(Color.RED);
-            }
-        });
-
- */
         mazePanel = new MazeSubject();
         mazePanel.setBackground(Color.GRAY);
         mazePanel.setPreferredSize(new Dimension(600, 400));
 
         JScrollPane scrollPane = new JScrollPane(mazePanel);
         add(scrollPane, BorderLayout.CENTER);
+
+        mazePanel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                handleMouseClick(e.getX(), e.getY());
+            }
+        });
 
         setLocationRelativeTo(null);
         setVisible(true);
@@ -233,6 +213,37 @@ public class MazeGUI extends JFrame {
         mazePanel.repaint();
     }
 
+    private void handleMouseClick(int x, int y) {
+        int col = x / (mazePanel.getWidth() / maze[0].length);
+        int row = y / (mazePanel.getHeight() / maze.length);
+
+        if (col < 0 || col >= maze[0].length || row < 0 || row >= maze.length) {
+            return; // Clicked outside the maze
+        }
+
+        if (settingEntry) {
+            if (startRow != -1 && startCol != -1) {
+                maze[startRow][startCol] = 0; // Clear previous entry point
+            }
+            startRow = row;
+            startCol = col;
+            maze[startRow][startCol] = 10; // Set new entry point
+            settingEntry = false;
+            settingExit = true;
+        } else if (settingExit) {
+            if (endRow != -1 && endCol != -1) {
+                maze[endRow][endCol] = 0; // Clear previous exit point
+            }
+            endRow = row;
+            endCol = col;
+            maze[endRow][endCol] = 11; // Set new exit point
+            settingExit = false;
+        }
+
+        mazePanel.setMaze(maze);
+        mazePanel.repaint();
+    }
+
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -242,4 +253,3 @@ public class MazeGUI extends JFrame {
         });
     }
 }
-
